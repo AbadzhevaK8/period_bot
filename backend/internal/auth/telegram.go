@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -66,12 +67,9 @@ func parseInt64(value string) int64 {
 	if value == "" {
 		return 0
 	}
-	var result int64
-	for _, r := range value {
-		if r < '0' || r > '9' {
-			return 0
-		}
-		result = result*10 + int64(r-'0')
+	result, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0
 	}
 	return result
 }

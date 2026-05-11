@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthClaims struct {
@@ -22,13 +24,37 @@ func JWTMiddleware(secret string) fiber.Handler {
 			return fiber.ErrUnauthorized
 		}
 
-		token := parts[1]
-		if token == "" {
+		tokenValue := parts[1]
+		if tokenValue == "" {
 			return fiber.ErrUnauthorized
 		}
 
-		// TODO: decode JWT and add user claims to context.
-		c.Locals("userID", int64(0))
+		parsed, err := jwt.Parse(tokenValue, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fiber.ErrUnauthorized
+			}
+			return []byte(secret), nil
+		})
+		if err != nil || !parsed.Valid {
+			return fiber.ErrUnauthorized
+		}
+
+		claims, ok := parsed.Claims.(jwt.MapClaims)
+		if !ok {
+			return fiber.ErrUnauthorized
+		}
+
+		sub, ok := claims["sub"].(string)
+		if !ok {
+			return fiber.ErrUnauthorized
+		}
+
+		userID, err := strconv.ParseInt(sub, 10, 64)
+		if err != nil {
+			return fiber.ErrUnauthorized
+		}
+
+		c.Locals("userID", userID)
 		return c.Next()
 	}
 }

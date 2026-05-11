@@ -379,6 +379,85 @@ volumes:
 
 ## 6. ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ НА VPS
 
+## 7. PRODUCTION ROUTING FOR medina.garum.tech
+
+Для Telegram Mini App `https://medina.garum.tech/period/` нужно настроить nginx так, чтобы:
+- `location = /period` редиректил на `/period/`
+- `location /period/` проксировал на frontend period_bot
+- `location /api/` проксировал на backend period_bot
+- `location /oauth2callback` остался на текущем meal_bot
+- корень `/` отдавал статическую заглушку или другой сайт
+
+### Пример nginx-конфига для `medina.garum.tech`
+
+```nginx
+server {
+    listen 80;
+    server_name medina.garum.tech;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name medina.garum.tech;
+
+    ssl_certificate /etc/letsencrypt/live/medina.garum.tech/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/medina.garum.tech/privkey.pem;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    root /var/www/medina;
+    index index.html;
+
+    location = / {
+        try_files /index.html =404;
+    }
+
+    location = /period {
+        return 301 /period/;
+    }
+
+    location /period/ {
+        proxy_pass http://127.0.0.1:5173/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8081/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /oauth2callback {
+        proxy_pass http://127.0.0.1:8080/oauth2callback;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### Примечания
+
+- `WEBAPP_URL` в `.env` должен быть `https://medina.garum.tech/period/`.
+- `period_bot` backend на VPS должен слушать `8081`.
+- frontend period_bot должен быть собран и развернут как статический сайт `dist` с `base=/period/`.
+- `meal_bot` callback остаётся на `8080`.
+
+## 8. ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ НА VPS
+
 Создать `.env` файлы вручную на сервере (не хранить в репозитории):
 
 ### /opt/cycle-calendar/prod/.env
@@ -387,7 +466,7 @@ ENV=production
 PORT=8080
 
 BOT_TOKEN=token_от_prod_бота
-WEBAPP_URL=https://app.medina.garum.tech
+WEBAPP_URL=https://medina.garum.tech/period/
 
 DATABASE_URL=postgres://user:pass@postgres:5432/cycle_calendar
 REDIS_URL=redis://redis:6379
@@ -404,7 +483,7 @@ ENV=staging
 PORT=8080
 
 BOT_TOKEN=token_от_stage_бота
-WEBAPP_URL=https://app-stage.medina.garum.tech
+WEBAPP_URL=https://stage.medina.garum.tech/period/
 
 DATABASE_URL=postgres://user:pass@postgres:5432/cycle_calendar_stage
 REDIS_URL=redis://redis:6379
@@ -421,7 +500,7 @@ ENV=development
 PORT=8080
 
 BOT_TOKEN=token_от_dev_бота
-WEBAPP_URL=https://app-dev.medina.garum.tech
+WEBAPP_URL=https://dev.medina.garum.tech/period/
 
 DATABASE_URL=postgres://user:pass@postgres:5432/cycle_calendar_dev
 REDIS_URL=redis://redis:6379

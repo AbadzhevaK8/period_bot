@@ -18,7 +18,7 @@ func NewBot(token, webAppURL string) (*tele.Bot, error) {
 
 	b.Handle("/start", func(c tele.Context) error {
 		button := tele.ReplyMarkup{}
-		webappBtn := button.WebApp("Открыть приложение", tele.WebApp{URL: webAppURL})
+		webappBtn := button.WebApp("Открыть приложение", &tele.WebApp{URL: webAppURL})
 		button.Reply(button.Row(webappBtn))
 		return c.Send("Привет! Открой приложение для отслеживания цикла.", &button)
 	})

@@ -25,7 +25,7 @@ services:
       dockerfile: Dockerfile
     command: ["go", "run", "./cmd/server"]
     ports:
-      - "8080:8080"
+      - "8081:8080"
     env_file:
       - .env
     volumes:
