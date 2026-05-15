@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import WebApp from '@twa-dev/sdk'
 import Calendar from './pages/Calendar'
 import Onboarding from './pages/Onboarding'
+import Settings from './pages/Settings'
 
 /**
  * Capture initData from the raw URL BEFORE any React Router processing.
@@ -50,6 +52,7 @@ function captureInitData(): string {
 function App() {
   const [initDataCaptured, setInitDataCaptured] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const theme = localStorage.getItem('period_theme') || '1'
@@ -83,35 +86,70 @@ function App() {
     search: window.location.search,
   })
 
+  useEffect(() => {
+    const backButton = WebApp?.BackButton
+    if (!backButton) return
+
+    const handleBack = () => navigate('/calendar')
+
+    try {
+      if (token && location.pathname === '/settings') {
+        backButton.show()
+        backButton.onClick(handleBack)
+      } else {
+        backButton.offClick(handleBack)
+        backButton.hide()
+      }
+    } catch {}
+
+    return () => {
+      try {
+        backButton.offClick(handleBack)
+      } catch {}
+    }
+  }, [location.pathname, navigate, token])
+
+  const showNavigation = !!token && location.pathname !== '/onboarding'
+
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          token ? (
-            <Navigate to="/calendar" replace />
-          ) : (
-            <Navigate to="/onboarding" replace />
-          )
-        }
-      />
-      <Route
-        path="/index.html"
-        element={<Navigate to="/onboarding" replace />}
-      />
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/calendar" element={<Calendar />} />
-      <Route
-        path="*"
-        element={
-          token ? (
-            <Navigate to="/calendar" replace />
-          ) : (
-            <Navigate to="/onboarding" replace />
-          )
-        }
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            token ? (
+              <Navigate to="/calendar" replace />
+            ) : (
+              <Navigate to="/onboarding" replace />
+            )
+          }
+        />
+        <Route
+          path="/index.html"
+          element={<Navigate to="/onboarding" replace />}
+        />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route
+          path="*"
+          element={
+            token ? (
+              <Navigate to="/calendar" replace />
+            ) : (
+              <Navigate to="/onboarding" replace />
+            )
+          }
+        />
+      </Routes>
+
+      {showNavigation && (
+        <nav className="app-nav" aria-label="Основная навигация">
+          <NavLink to="/calendar">Календарь</NavLink>
+          <NavLink to="/settings">Настройки</NavLink>
+        </nav>
+      )}
+    </>
   )
 }
 
