@@ -572,24 +572,78 @@ button:disabled {
 
 .cycle-form {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
-.cycle-form label {
-  color: var(--muted);
+.field-card {
+  background: color-mix(in srgb, var(--panel-bg) 72%, var(--button-soft-bg));
+  border-radius: var(--control-radius);
   display: grid;
-  font-size: 0.9rem;
-  font-weight: 700;
-  gap: 6px;
+  gap: 8px;
+  padding: 12px;
 }
 
-.cycle-form input {
-  background: var(--button-soft-bg);
+.field-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.field-card small {
+  color: color-mix(in srgb, var(--muted) 78%, transparent);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.field-card input {
+  appearance: none;
+  background: transparent;
   border: 0;
-  border-radius: 8px;
   color: var(--text);
-  min-height: 44px;
-  padding: 0 12px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  min-height: 32px;
+  outline: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.field-card input[type='date'] {
+  color-scheme: light dark;
+}
+
+.number-stepper {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 40px 1fr 40px;
+}
+
+.number-stepper input {
+  text-align: center;
+}
+
+.number-stepper input::-webkit-outer-spin-button,
+.number-stepper input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.number-stepper button {
+  background: color-mix(in srgb, var(--primary) 18%, var(--button-soft-bg));
+  color: var(--text);
+  min-height: 40px;
+  padding: 0;
+}
+
+.number-stepper button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 28%, var(--button-soft-hover));
+}
+
+.save-button {
+  color: var(--page-bg);
+  margin-top: 2px;
 }
 
 .error-text {

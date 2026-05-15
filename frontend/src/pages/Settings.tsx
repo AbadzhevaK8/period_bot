@@ -84,6 +84,14 @@ function Settings() {
     }
   }
 
+  const adjustCycleLength = (delta: number) => {
+    setCycleLength((value) => Math.min(40, Math.max(21, value + delta)))
+  }
+
+  const adjustPeriodLength = (delta: number) => {
+    setPeriodLength((value) => Math.min(10, Math.max(2, value + delta)))
+  }
+
   return (
     <div className="app-shell settings-shell">
       <header className="page-header">
@@ -130,35 +138,55 @@ function Settings() {
           <p className="settings-note">Загружаем данные цикла...</p>
         ) : (
           <form className="cycle-form" onSubmit={handleSubmit}>
-            <label>
-              Дата начала последней менструации
+            <label className="field-card">
+              <span>Дата начала последней менструации</span>
               <input value={periodStart} type="date" onChange={(event) => setPeriodStart(event.target.value)} required />
             </label>
-            <label>
-              Длина цикла
-              <input
-                value={cycleLength}
-                type="number"
-                min={21}
-                max={40}
-                onChange={(event) => setCycleLength(Number(event.target.value))}
-                required
-              />
-            </label>
-            <label>
-              Длина менструации
-              <input
-                value={periodLength}
-                type="number"
-                min={2}
-                max={10}
-                onChange={(event) => setPeriodLength(Number(event.target.value))}
-                required
-              />
-            </label>
+
+            <div className="field-card">
+              <span>Длина цикла</span>
+              <div className="number-stepper">
+                <button type="button" aria-label="Уменьшить длину цикла" onClick={() => adjustCycleLength(-1)}>
+                  -
+                </button>
+                <input
+                  value={cycleLength}
+                  type="number"
+                  min={21}
+                  max={40}
+                  onChange={(event) => setCycleLength(Number(event.target.value))}
+                  required
+                />
+                <button type="button" aria-label="Увеличить длину цикла" onClick={() => adjustCycleLength(1)}>
+                  +
+                </button>
+              </div>
+              <small>Обычно от 21 до 40 дней</small>
+            </div>
+
+            <div className="field-card">
+              <span>Длина менструации</span>
+              <div className="number-stepper">
+                <button type="button" aria-label="Уменьшить длину менструации" onClick={() => adjustPeriodLength(-1)}>
+                  -
+                </button>
+                <input
+                  value={periodLength}
+                  type="number"
+                  min={2}
+                  max={10}
+                  onChange={(event) => setPeriodLength(Number(event.target.value))}
+                  required
+                />
+                <button type="button" aria-label="Увеличить длину менструации" onClick={() => adjustPeriodLength(1)}>
+                  +
+                </button>
+              </div>
+              <small>Обычно от 2 до 10 дней</small>
+            </div>
             {error && <p className="error-text">{error}</p>}
             {status && <p className="success-text">{status}</p>}
-            <button type="submit" disabled={saving}>
+            <button className="save-button" type="submit" disabled={saving}>
               {saving ? 'Сохраняем...' : 'Сохранить цикл'}
             </button>
           </form>
