@@ -4,6 +4,75 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Period Bot Mini App</title>
+    <script>
+      // ⚡ CRITICAL: Capture Telegram initData BEFORE any framework processes the URL.
+      // This script runs synchronously during HTML parsing, before React or React Router loads.
+      // React Router's <Navigate> strips URL hash/query params, so we MUST save them NOW.
+
+      (function() {
+        try {
+          var data = '';
+
+          // 1. window.Telegram.WebApp.initData (native injection)
+          try {
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg && tg.initData && tg.initData.length > 0) {
+              data = tg.initData;
+            }
+          } catch(e) {}
+
+          // 2. URL hash (#tgWebAppData=...) — used by Telegram Desktop
+          if (!data) {
+            try {
+              var hash = window.location.hash;
+              if (hash && hash.indexOf('tgWebAppData=') >= 0) {
+                var params = new URLSearchParams(hash.replace(/^#/, ''));
+                data = params.get('tgWebAppData') || '';
+              }
+            } catch(e) {}
+          }
+
+          // 3. URL search params (?tgWebAppData=...)
+          if (!data) {
+            try {
+              var sp = new URLSearchParams(window.location.search);
+              data = sp.get('tgWebAppData') || '';
+            } catch(e) {}
+          }
+
+          // 4. Reconstruct from initDataUnsafe if initData is empty but unsafe has data
+          if (!data) {
+            try {
+              var tg = window.Telegram && window.Telegram.WebApp;
+              if (tg && tg.initDataUnsafe) {
+                var parts = [];
+                var u = tg.initDataUnsafe;
+                if (u.query_id) parts.push('query_id=' + encodeURIComponent(u.query_id));
+                if (u.user) parts.push('user=' + encodeURIComponent(typeof u.user === 'string' ? u.user : JSON.stringify(u.user)));
+                if (u.auth_date) parts.push('auth_date=' + encodeURIComponent(u.auth_date));
+                if (u.hash) parts.push('hash=' + encodeURIComponent(u.hash));
+                if (u.chat_type) parts.push('chat_type=' + encodeURIComponent(u.chat_type));
+                if (u.chat_instance) parts.push('chat_instance=' + encodeURIComponent(u.chat_instance));
+                if (u.start_param) parts.push('start_param=' + encodeURIComponent(u.start_param));
+                if (u.can_send_after) parts.push('can_send_after=' + encodeURIComponent(u.can_send_after));
+                if (parts.length >= 4) {
+                  data = parts.join('&');
+                }
+              }
+            } catch(e) {}
+          }
+
+          if (data) {
+            sessionStorage.setItem('tg_init_data', data);
+            console.log('[INLINE] Captured initData, length=' + data.length);
+          } else {
+            console.log('[INLINE] No initData found in any source');
+          }
+        } catch(e) {
+          console.error('[INLINE] Error capturing initData:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App Debug</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 16px; color: #58a6ff; }
+        h2 { font-size: 1.1rem; margin: 16px 0 8px; color: #bc8cff; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        td, th { text-align: left; padding: 6px 10px; border: 1px solid #30363d; }
+        th { background: #161b22; color: #8b949e; font-weight: 500; }
+        td { font-size: 0.85rem; word-break: break-all; }
+        .key { color: #7ee787; }
+        .val { color: #ffa657; }
+        .empty { color: #484f58; font-style: italic; }
+        .success { color: #3fb950; font-weight: bold; }
+        .fail { color: #f85149; font-weight: bold; }
+        button {
+            padding: 10px 20px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 12px;
+        }
+        button:hover { background: #2ea043; }
+        #initDataOutput {
+            margin-top: 12px;
+            padding: 12px;
+            background: #161b22;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Telegram Mini App Debug</h1>
+    <p id="status" style="margin-bottom: 16px;">Waiting...</p>
+
+    <h2>window.Telegram.WebApp</h2>
+    <table id="tg-table">
+        <tr><th>Property</th><th>Value</th></tr>
+    </table>
+
+    <h2>URL Information</h2>
+    <table id="url-table">
+        <tr><th>Property</th><th>Value</th></tr>
+    </table>
+
+    <h2>sessionStorage</h2>
+    <table id="ss-table">
+        <tr><th>Key</th><th>Value</th></tr>
+    </table>
+
+    <h2>Test Auth (manual initData)</h2>
+    <button onclick="testAuth()">Test Auth with captured initData</button>
+    <div id="initDataOutput"></div>
+
+    <script>
+        function addRow(tableId, key, value, valClass) {
+            const tbody = document.getElementById(tableId).querySelector('tbody') || document.getElementById(tableId);
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td class="key">' + escapeHtml(key) + '</td>' +
+                '<td class="' + (valClass || 'val') + '">' + escapeHtml(String(value || '(empty)')) + '</td>';
+            tbody.appendChild(tr);
+        }
+
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+        }
+
+        function inspect(obj, prefix, tableId) {
+            if (!obj) { addRow(tableId, prefix, '(null)', 'empty'); return; }
+            const keys = Object.keys(obj);
+            if (keys.length === 0) { addRow(tableId, prefix, '{} (empty)', 'empty'); return; }
+            for (const k of keys) {
+                try {
+                    const v = obj[k];
+                    let display;
+                    let vClass = 'val';
+                    if (typeof v === 'object' && v !== null) {
+                        display = JSON.stringify(v).slice(0, 200);
+                    } else {
+                        display = String(v);
+                    }
+                    if (!v && v !== 0 && v !== false) { vClass = 'empty'; }
+                    addRow(tableId, (prefix ? prefix + '.' : '') + k, display, vClass);
+                } catch(e) {
+                    addRow(tableId, (prefix ? prefix + '.' : '') + k, '(error: ' + e.message + ')', 'fail');
+                }
+            }
+        }
+
+        function run() {
+            // Check Telegram
+            const hasTelegram = !!(window.Telegram);
+            const hasWebApp = !!((window.Telegram && window.Telegram.WebApp));
+            const tg = hasWebApp ? window.Telegram.WebApp : null;
+
+            addRow('tg-table', '(global exists)', hasTelegram, hasTelegram ? 'success' : 'fail');
+            addRow('tg-table', '(WebApp exists)', hasWebApp, hasWebApp ? 'success' : 'fail');
+
+            if (hasTelegram) {
+                addRow('tg-table', 'Telegram keys', Object.keys(window.Telegram).join(', '));
+            }
+
+            if (tg) {
+                // Simple properties
+                addRow('tg-table', 'initData (str?)', tg.initData ? tg.initData.slice(0, 100) + '...' : '(empty)', tg.initData ? 'success' : 'fail');
+                addRow('tg-table', 'initData.length', String(tg.initData ? tg.initData.length : 0));
+                addRow('tg-table', 'initData type', typeof tg.initData);
+                addRow('tg-table', 'initDataUnsafe', JSON.stringify(tg.initDataUnsafe).slice(0, 300));
+                addRow('tg-table', 'initDataUnsafe keys', Object.keys(tg.initDataUnsafe || {}).join(', ') || '(empty)');
+                addRow('tg-table', 'version', tg.version || '(empty)');
+                addRow('tg-table', 'platform', tg.platform || '(empty)');
+                addRow('tg-table', 'colorScheme', tg.colorScheme || '(empty)');
+                addRow('tg-table', 'themeParams', JSON.stringify(tg.themeParams || {}).slice(0, 200));
+
+                // Check initDataUnsafe individually
+                const unsafe = tg.initDataUnsafe || {};
+                const unsafeKeys = Object.keys(unsafe);
+                if (unsafeKeys.length === 0) {
+                    // Try to enumerate all properties including non-enumerable
+                    const allKeys = [];
+                    for (const k in unsafe) allKeys.push(k);
+                    addRow('tg-table', 'initDataUnsafe (for-in)', allKeys.join(', ') || '(none)');
+                }
+                for (const k of unsafeKeys) {
+                    const v = unsafe[k];
+                    addRow('tg-table', 'unsafe.' + k, typeof v === 'object' ? JSON.stringify(v).slice(0, 200) : String(v).slice(0, 200));
+                }
+            }
+
+            // URL info
+            addRow('url-table', 'href', window.location.href);
+            addRow('url-table', 'search', window.location.search);
+            addRow('url-table', 'hash', window.location.hash);
+            addRow('url-table', 'pathname', window.location.pathname);
+            addRow('url-table', 'origin', window.location.origin);
+
+            // Check URL params
+            const sp = new URLSearchParams(window.location.search);
+            for (const [k, v] of sp) {
+                addRow('url-table', '?' + k, v.slice(0, 100));
+            }
+            if (window.location.hash) {
+                try {
+                    const hp = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+                    for (const [k, v] of hp) {
+                        addRow('url-table', '#' + k, v.slice(0, 100));
+                    }
+                } catch(e) {}
+            }
+
+            // sessionStorage
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const k = sessionStorage.key(i);
+                const v = sessionStorage.getItem(k);
+                addRow('ss-table', k, v ? v.slice(0, 100) : '(empty)');
+            }
+            if (sessionStorage.length === 0) {
+                addRow('ss-table', '(empty)', 'sessionStorage is empty', 'empty');
+            }
+
+            // Check if running in iframe
+            addRow('url-table', 'in iframe?', window !== window.top ? 'YES (iframe)' : 'NO (top window)', window !== window.top ? 'success' : 'val');
+
+            document.getElementById('status').innerHTML = '<span class="success">✓ Diagnostics complete</span>';
+        }
+
+        async function testAuth() {
+            const initData = sessionStorage.getItem('tg_init_data') || 
+                (window.Telegram?.WebApp?.initData) || '';
+            
+            const output = document.getElementById('initDataOutput');
+            output.style.display = 'block';
+
+            if (!initData) {
+                output.innerHTML = '<span class="fail">No initData found in any source</span>';
+                return;
+            }
+
+            output.innerHTML = 'Sending auth request... (initData length: ' + initData.length + ')';
+
+            try {
+                const resp = await fetch('/api/auth/telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    output.innerHTML = '<span class="success">✓ Auth success!</span> Token: ' + data.token.slice(0, 30) + '...<br>User: ' + JSON.stringify(data.user);
+                    localStorage.setItem('auth_token', data.token);
+                } else {
+                    output.innerHTML = '<span class="fail">✗ Auth failed (' + resp.status + ')</span><br>' + JSON.stringify(data);
+                }
+            } catch(e) {
+                output.innerHTML = '<span class="fail">✗ Network error: ' + e.message + '</span>';
+            }
+        }
+
+        // Run immediately
+        document.addEventListener('DOMContentLoaded', run);
+        // Also run synchronously
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run);
+        } else {
+            run();
+        }
+
+        // Enable button click
+        window.testAuth = testAuth;
+    </script>
+</body>
+</html>

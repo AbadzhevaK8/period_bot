@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"sort"
@@ -46,8 +47,11 @@ func ValidateInitData(initData, botToken string) (*TelegramUser, error) {
 	}
 	dataCheckString := strings.Join(dataStrings, "\n")
 
-	secret := sha256.Sum256([]byte("WebAppData" + botToken))
-	mac := hmac.New(sha256.New, secret[:])
+	secretMac := hmac.New(sha256.New, []byte("WebAppData"))
+	secretMac.Write([]byte(botToken))
+	secret := secretMac.Sum(nil)
+
+	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(dataCheckString))
 	expected := hex.EncodeToString(mac.Sum(nil))
 
@@ -55,8 +59,42 @@ func ValidateInitData(initData, botToken string) (*TelegramUser, error) {
 		return nil, errors.New("invalid initData hash")
 	}
 
+	user, err := parseTelegramUser(values)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func parseTelegramUser(values url.Values) (*TelegramUser, error) {
+	rawUser := values.Get("user")
+	if rawUser != "" {
+		var user struct {
+			ID        int64  `json:"id"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+			Username  string `json:"username"`
+		}
+		if err := json.Unmarshal([]byte(rawUser), &user); err != nil {
+			return nil, errors.New("invalid user data")
+		}
+		if user.ID == 0 {
+			return nil, errors.New("missing user id")
+		}
+		return &TelegramUser{
+			ID:        user.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Username:  user.Username,
+		}, nil
+	}
+
+	id := parseInt64(values.Get("id"))
+	if id == 0 {
+		return nil, errors.New("missing user data")
+	}
 	return &TelegramUser{
-		ID:        parseInt64(values.Get("id")),
+		ID:        id,
 		FirstName: values.Get("first_name"),
 		LastName:  values.Get("last_name"),
 		Username:  values.Get("username"),
