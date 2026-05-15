@@ -551,27 +551,36 @@ button:disabled {
 }
 
 .day-card {
-  background: var(--button-soft-bg);
-  border: 0;
+  --day-cell-text: var(--text);
+  --day-card-phase: var(--primary);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--day-card-phase) 92%, var(--panel-bg)),
+      color-mix(in srgb, var(--day-card-phase) 72%, var(--page-bg))
+    );
+  border: 1px solid color-mix(in srgb, var(--day-cell-text) 24%, transparent);
   border-radius: var(--card-radius);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--day-card-phase) 24%, transparent);
+  color: var(--day-cell-text);
   margin-top: 18px;
   padding: 18px;
 }
 
 .day-card-date {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--day-cell-text) 78%, transparent);
   font-size: 0.85rem;
   font-weight: 700;
 }
 
 .day-card h2 {
-  color: var(--text);
+  color: var(--day-cell-text);
   font-size: 1.28rem;
   margin: 4px 0 12px;
 }
 
 .day-card p {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--day-cell-text) 86%, transparent);
   line-height: 1.45;
   margin: 12px 0 0;
 }
@@ -583,9 +592,9 @@ button:disabled {
 }
 
 .day-card-meta span {
-  background: var(--chip-bg);
+  background: color-mix(in srgb, var(--day-cell-text) 15%, transparent);
   border-radius: var(--control-radius);
-  color: var(--text);
+  color: var(--day-cell-text);
   font-size: 0.82rem;
   font-weight: 700;
   padding: 6px 10px;

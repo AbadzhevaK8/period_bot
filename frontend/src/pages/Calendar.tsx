@@ -119,6 +119,13 @@ function phaseStyleForTheme(_theme: ThemeId, phaseColor: string) {
   } as CSSProperties
 }
 
+function dayCardStyleForTheme(theme: ThemeId, phaseColor: string) {
+  return {
+    ...phaseStyleForTheme(theme, phaseColor),
+    '--day-card-phase': phaseColor,
+  } as CSSProperties
+}
+
 function formatDate(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -365,7 +372,7 @@ function Calendar() {
       </div>
 
       {selectedDay && (
-        <section className="day-card" style={{ borderColor: phaseColorForTheme(theme, selectedDay.phase.name) }}>
+        <section className="day-card" style={dayCardStyleForTheme(theme, phaseColorForTheme(theme, selectedDay.phase.name))}>
           <div>
             <span className="day-card-date">
               {new Date(`${selectedDay.date}T00:00:00`).toLocaleDateString('ru-RU', {
