@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCycle, saveCycle } from '../api/client'
-import { applyTheme, getStoredTheme, ThemeId, themes } from '../theme'
+import { applyTheme, getStoredTheme, ThemeId, themePhaseColors, themes } from '../theme'
 
 function formatDate(date: Date) {
   const year = date.getFullYear()
@@ -106,6 +106,11 @@ function Settings() {
             >
               <span className="theme-number">{item.id}</span>
               <span className="theme-label">{item.label}</span>
+              <span className="theme-swatches" aria-hidden="true">
+                {Object.entries(themePhaseColors[item.id]).map(([phase, color]) => (
+                  <span key={phase} style={{ background: color }} />
+                ))}
+              </span>
             </button>
           ))}
         </div>

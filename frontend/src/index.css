@@ -412,9 +412,9 @@ button:disabled {
   border-radius: var(--control-radius);
   color: var(--text);
   display: grid;
-  gap: 2px;
+  gap: 5px;
   justify-items: start;
-  min-height: 54px;
+  min-height: 74px;
   padding: 8px 10px;
   text-align: left;
 }
@@ -427,6 +427,20 @@ button:disabled {
   background: var(--primary);
   color: var(--page-bg);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 34%, transparent);
+}
+
+.theme-swatches {
+  border-radius: 999px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  height: 10px;
+  margin-top: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.theme-swatches span {
+  min-width: 0;
 }
 
 .theme-number {

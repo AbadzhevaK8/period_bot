@@ -39,7 +39,7 @@ export const themes: Array<{ id: ThemeId; label: string }> = [
   { id: '16', label: 'Signal' },
 ]
 
-const themePhaseColors: Record<ThemeId, Record<PhaseName, string>> = {
+export const themePhaseColors: Record<ThemeId, Record<PhaseName, string>> = {
   '1': { menstruation: '#FF2DAA', follicular: '#00F5A0', ovulation: '#FFE156', luteal: '#8A4FFF' },
   '2': { menstruation: '#FF6B9A', follicular: '#4ECDC4', ovulation: '#FFE66D', luteal: '#6A4CFF' },
   '3': { menstruation: '#0057FF', follicular: '#FF006E', ovulation: '#FFD500', luteal: '#00B050' },
