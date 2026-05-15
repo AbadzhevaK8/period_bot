@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { CSSProperties, FormEvent, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DayInfo, getCalendar, getCycle, saveCycle } from '../api/client'
 
@@ -101,16 +101,22 @@ function phaseColorForTheme(theme: ThemeId, phaseName?: string) {
 
 function readableTextColor(hexColor: string) {
   const hex = hexColor.replace('#', '')
-  const red = parseInt(hex.slice(0, 2), 16)
-  const green = parseInt(hex.slice(2, 4), 16)
-  const blue = parseInt(hex.slice(4, 6), 16)
-  const luminance = (red * 299 + green * 587 + blue * 114) / 1000
+  const channels = [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map((channel) => {
+    const value = parseInt(channel, 16) / 255
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+  const whiteContrast = 1.05 / (luminance + 0.05)
+  const blackContrast = (luminance + 0.05) / 0.05
 
-  return luminance > 150 ? '#171923' : '#FFFFFF'
+  return blackContrast >= whiteContrast ? '#111827' : '#FFFFFF'
 }
 
-function phaseStyleForTheme(theme: ThemeId, phaseColor: string) {
-  return { background: phaseColor, color: readableTextColor(phaseColor) }
+function phaseStyleForTheme(_theme: ThemeId, phaseColor: string) {
+  return {
+    '--day-cell-text': readableTextColor(phaseColor),
+    background: phaseColor,
+  } as CSSProperties
 }
 
 function formatDate(date: Date) {

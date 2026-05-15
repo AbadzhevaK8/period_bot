@@ -465,6 +465,7 @@ button:disabled {
 }
 
 .day-cell {
+  --day-cell-text: var(--cell-text);
   aspect-ratio: 1;
   background: var(--panel-bg);
   border: 0;
@@ -503,14 +504,14 @@ button:disabled {
 }
 
 .day-number {
-  color: var(--cell-text);
+  color: var(--day-cell-text);
   font-weight: 800;
   line-height: 1;
 }
 
 .cycle-day,
 .phase-name {
-  color: var(--cell-text);
+  color: var(--day-cell-text);
   font-size: clamp(0.52rem, 2.4vw, 0.72rem);
   line-height: 1.1;
   overflow: hidden;
