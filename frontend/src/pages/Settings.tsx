@@ -1,7 +1,7 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { CSSProperties, FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCycle, saveCycle } from '../api/client'
-import { applyTheme, getStoredTheme, ThemeId, themePhaseColors, themes } from '../theme'
+import { applyTheme, getStoredTheme, ThemeId, themePhaseColors, themePreviewColors, themes } from '../theme'
 
 function formatDate(date: Date) {
   const year = date.getFullYear()
@@ -102,6 +102,10 @@ function Settings() {
               type="button"
               className={theme === item.id ? 'active' : ''}
               aria-pressed={theme === item.id}
+              style={{
+                '--theme-preview-bg': themePreviewColors[item.id].background,
+                '--theme-preview-text': themePreviewColors[item.id].text,
+              } as CSSProperties}
               onClick={() => setTheme(item.id)}
             >
               <span className="theme-number">{item.id}</span>

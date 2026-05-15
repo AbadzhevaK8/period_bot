@@ -39,6 +39,25 @@ export const themes: Array<{ id: ThemeId; label: string }> = [
   { id: '16', label: 'Signal' },
 ]
 
+export const themePreviewColors: Record<ThemeId, { background: string; text: string }> = {
+  '1': { background: '#282A36', text: '#F8F8F2' },
+  '2': { background: '#F8F8F2', text: '#282A36' },
+  '3': { background: '#1E222A', text: '#E6EFF7' },
+  '4': { background: '#FAFAFA', text: '#24292E' },
+  '5': { background: '#1A1B26', text: '#C0CAF5' },
+  '6': { background: '#F7F8FC', text: '#1F2335' },
+  '7': { background: '#242933', text: '#ECEFF4' },
+  '8': { background: '#ECEFF4', text: '#2E3440' },
+  '9': { background: '#1E1E2E', text: '#CDD6F4' },
+  '10': { background: '#EFF1F5', text: '#4C4F69' },
+  '11': { background: '#282828', text: '#FBF1C7' },
+  '12': { background: '#FBF1C7', text: '#3C3836' },
+  '13': { background: '#002B36', text: '#EEE8D5' },
+  '14': { background: '#FDF6E3', text: '#073642' },
+  '15': { background: '#2E2E2E', text: '#D6D6D6' },
+  '16': { background: '#D6D6D6', text: '#2E2E2E' },
+}
+
 export const themePhaseColors: Record<ThemeId, Record<PhaseName, string>> = {
   '1': { menstruation: '#FF2DAA', follicular: '#00F5A0', ovulation: '#FFE156', luteal: '#8A4FFF' },
   '2': { menstruation: '#FF6B9A', follicular: '#4ECDC4', ovulation: '#FFE66D', luteal: '#6A4CFF' },

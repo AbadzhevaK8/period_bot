@@ -407,10 +407,17 @@ button:disabled {
 }
 
 .theme-grid button {
-  background: color-mix(in srgb, var(--button-soft-bg) 82%, var(--panel-bg));
-  border: 0;
+  --theme-preview-bg: var(--button-soft-bg);
+  --theme-preview-text: var(--text);
+  background:
+    linear-gradient(
+      135deg,
+      var(--theme-preview-bg),
+      color-mix(in srgb, var(--theme-preview-bg) 82%, var(--panel-bg))
+    );
+  border: 1px solid color-mix(in srgb, var(--theme-preview-text) 14%, transparent);
   border-radius: var(--control-radius);
-  color: var(--text);
+  color: var(--theme-preview-text);
   display: grid;
   gap: 4px;
   justify-items: start;
@@ -420,12 +427,11 @@ button:disabled {
 }
 
 .theme-grid button:hover:not(:disabled) {
-  background: var(--button-soft-hover);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-preview-bg) 32%, transparent);
 }
 
 .theme-grid button.active {
-  background: var(--primary);
-  color: var(--page-bg);
+  border-color: var(--primary);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 34%, transparent);
 }
 
