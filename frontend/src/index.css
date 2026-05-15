@@ -559,7 +559,7 @@ button:disabled {
       color-mix(in srgb, var(--day-card-phase) 92%, var(--panel-bg)),
       color-mix(in srgb, var(--day-card-phase) 72%, var(--page-bg))
     );
-  border: 1px solid color-mix(in srgb, var(--day-cell-text) 24%, transparent);
+  border: 0;
   border-radius: var(--card-radius);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--day-card-phase) 24%, transparent);
   color: var(--day-cell-text);
