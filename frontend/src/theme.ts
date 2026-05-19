@@ -67,7 +67,7 @@ export const themePhaseColors: Record<ThemeId, Record<PhaseName, string>> = {
   '6': { menstruation: '#FF7A18', follicular: '#E83F6F', ovulation: '#3A0CA3', luteal: '#FFD166' },
   '7': { menstruation: '#0077B6', follicular: '#00B4D8', ovulation: '#90E0EF', luteal: '#7400B8' },
   '8': { menstruation: '#D81159', follicular: '#4361EE', ovulation: '#7209B7', luteal: '#FF8C42' },
-  '9': { menstruation: '#FFAFCC', follicular: '#BDE0FE', ovulation: '#CAFFBF', luteal: '#FFC8DD' },
+  '9': { menstruation: '#FFAFCC', follicular: '#BDE0FE', ovulation: '#CAFFBF', luteal: '#FACF92' },
   '10': { menstruation: '#00BBF9', follicular: '#F15BB5', ovulation: '#FEE440', luteal: '#9B5DE5' },
   '11': { menstruation: '#F94144', follicular: '#F3722C', ovulation: '#F9C74F', luteal: '#43AA8B' },
   '12': { menstruation: '#009B72', follicular: '#2D00F7', ovulation: '#FFBA08', luteal: '#D00000' },
