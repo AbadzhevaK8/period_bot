@@ -861,13 +861,21 @@ button:disabled {
 }
 
 .note-field textarea {
-  background: var(--panel-bg);
-  border: 0;
+  background: color-mix(in srgb, var(--panel-bg) 82%, var(--text) 8%);
+  border: 1px solid color-mix(in srgb, var(--text) 26%, transparent);
   border-radius: var(--control-radius);
   color: var(--text);
-  min-height: 96px;
+  box-sizing: border-box;
+  min-height: 116px;
+  outline: 0;
   padding: 12px;
   resize: vertical;
+  width: 100%;
+}
+
+.note-field textarea:focus {
+  border-color: #D6FF5F;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #D6FF5F 24%, transparent);
 }
 
 .insight-banner {
