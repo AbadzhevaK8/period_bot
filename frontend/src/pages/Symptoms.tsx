@@ -3,19 +3,19 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getInsights, getSymptom, Pattern, saveSymptom } from '../api/client'
 
 const moodOptions = [
-  { value: 'calm', label: 'Спокойно' },
-  { value: 'happy', label: 'Радостно' },
-  { value: 'irritable', label: 'Раздражение' },
-  { value: 'anxious', label: 'Тревожно' },
-  { value: 'sad', label: 'Грустно' },
+  { value: 'calm', label: 'Спокойное' },
+  { value: 'happy', label: 'Хорошее' },
+  { value: 'irritable', label: 'Раздражительное' },
+  { value: 'anxious', label: 'Тревожное' },
+  { value: 'sad', label: 'Грустное' },
 ]
 
 const bodyOptions = [
-  { value: 'cramps', label: 'Спазмы' },
+  { value: 'cramps', label: 'Боль/спазмы внизу живота' },
   { value: 'bloating', label: 'Вздутие' },
-  { value: 'headache', label: 'Голова' },
-  { value: 'breast_tenderness', label: 'Грудь' },
-  { value: 'back_pain', label: 'Спина' },
+  { value: 'headache', label: 'Головная боль' },
+  { value: 'breast_tenderness', label: 'Чувствительность груди' },
+  { value: 'back_pain', label: 'Боль в пояснице' },
 ]
 
 function toggleValue(values: string[], value: string) {
@@ -119,6 +119,7 @@ function Symptoms() {
 
         <section className="symptom-section">
           <h2>Настроение</h2>
+          <p>Можно выбрать несколько вариантов.</p>
           <div className="chip-grid">
             {moodOptions.map((option) => (
               <button
@@ -135,7 +136,8 @@ function Symptoms() {
         </section>
 
         <section className="symptom-section">
-          <h2>Тело</h2>
+          <h2>Физические ощущения</h2>
+          <p>Отметь только то, что заметно сегодня.</p>
           <div className="chip-grid">
             {bodyOptions.map((option) => (
               <button

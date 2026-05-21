@@ -785,15 +785,23 @@ button:disabled {
 }
 
 .symptom-section {
-  background: var(--button-soft-bg);
+  background: color-mix(in srgb, var(--panel-bg) 88%, var(--button-soft-bg));
   border-radius: var(--card-radius);
   display: grid;
-  gap: 10px;
+  gap: 9px;
   padding: 14px;
 }
 
 .symptom-section h2 {
   font-size: 1rem;
+  margin: 0;
+}
+
+.symptom-section p {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.35;
   margin: 0;
 }
 
@@ -808,20 +816,37 @@ button:disabled {
 }
 
 .chip-grid {
-  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
 }
 
 .energy-picker button,
 .chip-grid button {
-  background: var(--panel-bg);
+  background: color-mix(in srgb, var(--panel-bg) 92%, var(--text) 8%);
+  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
   color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.15;
   min-width: 0;
+  padding: 0 12px;
+  text-align: center;
 }
 
 .energy-picker button.active,
 .chip-grid button.active {
-  background: var(--primary);
-  color: var(--page-bg);
+  background: #D6FF5F;
+  border-color: #D6FF5F;
+  color: #17202A;
+  box-shadow: 0 8px 18px color-mix(in srgb, #D6FF5F 26%, transparent);
+}
+
+.energy-picker button:hover:not(:disabled),
+.chip-grid button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--panel-bg) 78%, var(--text) 14%);
+}
+
+.energy-picker button.active:hover:not(:disabled),
+.chip-grid button.active:hover:not(:disabled) {
+  background: #BFEA45;
 }
 
 .note-field {
