@@ -90,6 +90,15 @@ export interface Pattern {
   message: string
 }
 
+export interface NotificationSettings {
+  userId?: number
+  enabled: boolean
+  notifyTime: string
+  timezone: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 function authHeaders() {
   const token = localStorage.getItem('auth_token')
   return {
@@ -158,4 +167,15 @@ export function saveSymptom(payload: SaveSymptomPayload) {
 
 export function getInsights() {
   return apiRequest<Pattern[]>('/api/insights')
+}
+
+export function getNotificationSettings() {
+  return apiRequest<NotificationSettings>('/api/settings/notifications')
+}
+
+export function saveNotificationSettings(payload: NotificationSettings) {
+  return apiRequest<NotificationSettings>('/api/settings/notifications', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
 }

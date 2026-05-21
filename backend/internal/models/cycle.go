@@ -42,3 +42,12 @@ type Pattern struct {
 	Occurrences int    `json:"occurrences"`
 	Message     string `json:"message"`
 }
+
+type NotificationSettings struct {
+	UserID     int64     `json:"userId"`
+	Enabled    bool      `json:"enabled"`
+	NotifyTime string    `json:"notifyTime"`
+	Timezone   string    `json:"timezone"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
+}

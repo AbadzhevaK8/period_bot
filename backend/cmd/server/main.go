@@ -56,6 +56,7 @@ func main() {
 	api.RegisterAuthRoutes(app, cfg.BotToken, cfg.JWTSecret, pool)
 	api.RegisterCycleRoutes(app, cfg.JWTSecret, pool)
 	api.RegisterSymptomRoutes(app, cfg.JWTSecret, pool)
+	api.RegisterNotificationRoutes(app, cfg.JWTSecret, pool)
 
 	log.Printf("starting backend on :%s", cfg.Port)
 	if err := app.Listen(":" + cfg.Port); err != nil {

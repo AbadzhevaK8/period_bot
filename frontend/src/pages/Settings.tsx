@@ -1,6 +1,6 @@
 import { CSSProperties, FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCycle, saveCycle } from '../api/client'
+import { getCycle, getNotificationSettings, saveCycle, saveNotificationSettings } from '../api/client'
 import { applyTheme, getStoredTheme, ThemeId, themePhaseColors, themePreviewColors, themes } from '../theme'
 
 function formatDate(date: Date) {
@@ -24,8 +24,15 @@ function Settings() {
   const [periodLength, setPeriodLength] = useState(5)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [notificationsLoading, setNotificationsLoading] = useState(true)
+  const [notificationsSaving, setNotificationsSaving] = useState(false)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [notifyTime, setNotifyTime] = useState('09:00')
+  const [timezone, setTimezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Moscow')
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
+  const [notificationError, setNotificationError] = useState('')
+  const [notificationStatus, setNotificationStatus] = useState('')
 
   useEffect(() => {
     applyTheme(theme)
@@ -62,6 +69,35 @@ function Settings() {
     }
   }, [navigate])
 
+  useEffect(() => {
+    let mounted = true
+
+    getNotificationSettings()
+      .then((settings) => {
+        if (!mounted) return
+        setNotificationsEnabled(settings.enabled)
+        setNotifyTime(settings.notifyTime)
+        setTimezone(settings.timezone)
+      })
+      .catch((err) => {
+        if (!mounted) return
+        const code = (err as any).status
+        if (code === 401) {
+          localStorage.removeItem('auth_token')
+          navigate('/onboarding', { replace: true })
+          return
+        }
+        setNotificationError('Не удалось загрузить настройки уведомлений.')
+      })
+      .finally(() => {
+        if (mounted) setNotificationsLoading(false)
+      })
+
+    return () => {
+      mounted = false
+    }
+  }, [navigate])
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setSaving(true)
@@ -90,6 +126,35 @@ function Settings() {
 
   const adjustPeriodLength = (delta: number) => {
     setPeriodLength((value) => Math.min(10, Math.max(2, value + delta)))
+  }
+
+  const handleNotificationSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setNotificationsSaving(true)
+    setNotificationError('')
+    setNotificationStatus('')
+
+    try {
+      const saved = await saveNotificationSettings({
+        enabled: notificationsEnabled,
+        notifyTime,
+        timezone,
+      })
+      setNotificationsEnabled(saved.enabled)
+      setNotifyTime(saved.notifyTime)
+      setTimezone(saved.timezone)
+      setNotificationStatus(saved.enabled ? 'Напоминания включены.' : 'Напоминания выключены.')
+    } catch (err) {
+      const code = (err as any).status
+      if (code === 401) {
+        localStorage.removeItem('auth_token')
+        navigate('/onboarding', { replace: true })
+        return
+      }
+      setNotificationError('Не удалось сохранить уведомления.')
+    } finally {
+      setNotificationsSaving(false)
+    }
   }
 
   return (
@@ -188,6 +253,58 @@ function Settings() {
             {status && <p className="success-text">{status}</p>}
             <button className="save-button" type="submit" disabled={saving}>
               {saving ? 'Сохраняем...' : 'Сохранить цикл'}
+            </button>
+          </form>
+        )}
+      </section>
+
+      <section className="settings-section" aria-label="Настройки уведомлений">
+        <div>
+          <h2>Напоминания</h2>
+          <p>Когда отправка будет подключена, бот сможет напоминать отметить самочувствие.</p>
+        </div>
+
+        {notificationsLoading ? (
+          <p className="settings-note">Загружаем уведомления...</p>
+        ) : (
+          <form className="cycle-form" onSubmit={handleNotificationSubmit}>
+            <div className="toggle-row">
+              <span>
+                <strong>{notificationsEnabled ? 'Уведомления включены' : 'Уведомления выключены'}</strong>
+                <small>{notificationsEnabled ? 'Бот будет использовать время ниже для ежедневного напоминания.' : 'Нажмите кнопку, чтобы подготовить ежедневные напоминания.'}</small>
+              </span>
+              <button className="toggle-button" type="button" aria-pressed={notificationsEnabled} onClick={() => setNotificationsEnabled((value) => !value)}>
+                {notificationsEnabled ? 'Выключить' : 'Включить'}
+              </button>
+            </div>
+
+            <label className="field-card">
+              <span>Время напоминания</span>
+              <input
+                value={notifyTime}
+                type="time"
+                onChange={(event) => setNotifyTime(event.target.value)}
+                disabled={!notificationsEnabled}
+                required
+              />
+            </label>
+
+            <label className="field-card">
+              <span>Часовой пояс</span>
+              <input
+                value={timezone}
+                type="text"
+                onChange={(event) => setTimezone(event.target.value)}
+                disabled={!notificationsEnabled}
+                required
+              />
+              <small>Например: Europe/Moscow</small>
+            </label>
+
+            {notificationError && <p className="error-text">{notificationError}</p>}
+            {notificationStatus && <p className="success-text">{notificationStatus}</p>}
+            <button className="save-button" type="submit" disabled={notificationsSaving}>
+              {notificationsSaving ? 'Сохраняем...' : 'Сохранить напоминания'}
             </button>
           </form>
         )}

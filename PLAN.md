@@ -454,15 +454,15 @@
 
 ### 05.1 API настроек
 
-- [ ] **Миграция 005: notification_settings**
+- [x] **Миграция 005: notification_settings**
   - Таблица согласно CLAUDE.md секция 4
   - Создавать запись с дефолтами при регистрации пользователя
 
-- [ ] **PUT /api/settings/notifications**
+- [x] **PUT /api/settings/notifications**
   - Body: `{ enabled: bool, notifyTime: "HH:MM", timezone: string }`
   - Валидация формата времени и timezone
 
-- [ ] **GET /api/settings/notifications**
+- [x] **GET /api/settings/notifications**
   - Вернуть текущие настройки
 
 ### 05.2 Крон-задача
@@ -488,7 +488,7 @@
 
 ### 05.3 Фронтенд — настройки уведомлений
 
-- [ ] **Экран настроек уведомлений**
+- [x] **Экран настроек уведомлений**
   - `src/pages/Profile/Notifications.tsx`
   - Тогл «Включить напоминания»
   - Тайм-пикер «Время напоминания»

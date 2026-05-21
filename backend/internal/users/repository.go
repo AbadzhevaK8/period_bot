@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/medina/cycle-calendar/backend/internal/auth"
+	"github.com/medina/cycle-calendar/backend/internal/notifications"
 )
 
 func Upsert(ctx context.Context, pool *pgxpool.Pool, user *auth.TelegramUser) error {
@@ -23,7 +24,11 @@ ON CONFLICT (id) DO UPDATE SET
 		nullString(user.FirstName),
 		nullString(user.LastName),
 	)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return notifications.EnsureDefaultSettings(ctx, pool, user.ID)
 }
 
 func nullString(value string) interface{} {
