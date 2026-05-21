@@ -236,24 +236,6 @@ function Calendar() {
 
       {error && <p className="error-text">{error}</p>}
 
-      <div className="calendar-actions">
-        <button type="button" className="secondary-action" onClick={() => setShowCycleStart((value) => !value)}>
-          Начался цикл
-        </button>
-      </div>
-
-      {showCycleStart && (
-        <form className="cycle-start-panel" onSubmit={handleCycleStartSubmit}>
-          <label>
-            Первый день менструации
-            <input value={cycleStartDate} type="date" onChange={(event) => setCycleStartDate(event.target.value)} required />
-          </label>
-          <button type="submit" disabled={savingCycleStart}>
-            {savingCycleStart ? 'Добавляем...' : 'Добавить запись'}
-          </button>
-        </form>
-      )}
-
       <div className="weekdays">
         {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
           <span key={day}>{day}</span>
@@ -308,6 +290,24 @@ function Calendar() {
           </button>
         </section>
       )}
+
+      <section className="calendar-record-section">
+        <button type="button" className="record-action" onClick={() => setShowCycleStart((value) => !value)}>
+          Добавить запись
+        </button>
+
+        {showCycleStart && (
+          <form className="cycle-start-panel" onSubmit={handleCycleStartSubmit}>
+            <label>
+              Первый день менструации
+              <input value={cycleStartDate} type="date" onChange={(event) => setCycleStartDate(event.target.value)} required />
+            </label>
+            <button type="submit" disabled={savingCycleStart}>
+              {savingCycleStart ? 'Добавляем...' : 'Сохранить'}
+            </button>
+          </form>
+        )}
+      </section>
     </div>
   )
 }

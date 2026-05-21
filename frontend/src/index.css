@@ -473,27 +473,12 @@ button:disabled {
   margin-bottom: 18px;
 }
 
-.calendar-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin: -6px 0 14px;
-}
-
-.secondary-action {
-  background: var(--button-soft-bg);
-  color: var(--text);
-}
-
-.secondary-action:hover:not(:disabled) {
-  background: var(--button-soft-hover);
-}
-
 .cycle-start-panel {
   background: var(--button-soft-bg);
   border-radius: var(--card-radius);
   display: grid;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-top: 10px;
   padding: 14px;
 }
 
@@ -512,6 +497,24 @@ button:disabled {
   color: var(--text);
   min-height: 42px;
   padding: 0 12px;
+}
+
+.calendar-record-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-bottom: 4px;
+}
+
+.record-action {
+  background: #D6FF5F;
+  color: #17202A;
+  min-height: 46px;
+  width: 100%;
+}
+
+.record-action:hover:not(:disabled) {
+  background: #BFEA45;
 }
 
 .calendar-header h1 {
