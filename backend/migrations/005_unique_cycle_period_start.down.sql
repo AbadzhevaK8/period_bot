@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_cycle_entries_user_period_unique;

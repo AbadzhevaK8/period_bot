@@ -24,6 +24,10 @@ type cycleRequest struct {
 	PeriodLength int    `json:"periodLength"`
 }
 
+type cycleStartRequest struct {
+	PeriodStart string `json:"periodStart"`
+}
+
 type cycleResponse struct {
 	ID           int    `json:"id"`
 	UserID       int64  `json:"userId"`
@@ -59,6 +63,46 @@ func RegisterCycleRoutes(app *fiber.App, jwtSecret string, pool *pgxpool.Pool) {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "ok"})
 	})
 
+	api.Post("/cycle/start", func(c *fiber.Ctx) error {
+		userID, ok := userIDFromContext(c)
+		if !ok {
+			return fiber.ErrUnauthorized
+		}
+
+		var req cycleStartRequest
+		if err := c.BodyParser(&req); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		}
+
+		periodStart, err := periodStartFromRequest(req)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+
+		latest, err := cycle.GetLatestEntry(c.Context(), pool, userID)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fiber.NewError(fiber.StatusBadRequest, "cycle data is required")
+			}
+			log.Printf("[cycle] get latest failed user_id=%d err=%v", userID, err)
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to get cycle entry")
+		}
+
+		entry := models.CycleEntry{
+			UserID:       userID,
+			PeriodStart:  periodStart,
+			CycleLength:  latest.CycleLength,
+			PeriodLength: latest.PeriodLength,
+		}
+
+		if err := cycle.AddCycleStart(c.Context(), pool, entry); err != nil {
+			log.Printf("[cycle] add start failed user_id=%d err=%v", userID, err)
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to add cycle start")
+		}
+
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "ok"})
+	})
+
 	api.Get("/cycle", func(c *fiber.Ctx) error {
 		userID, ok := userIDFromContext(c)
 		if !ok {
@@ -88,22 +132,30 @@ func RegisterCycleRoutes(app *fiber.App, jwtSecret string, pool *pgxpool.Pool) {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		entry, err := cycle.GetLatestEntry(c.Context(), pool, userID)
+		entries, err := cycle.GetEntriesForCalendar(c.Context(), pool, userID, to)
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return fiber.NewError(fiber.StatusBadRequest, "cycle data is required")
-			}
-			log.Printf("[calendar] get latest failed user_id=%d err=%v", userID, err)
-			return fiber.NewError(fiber.StatusInternalServerError, "failed to get cycle entry")
+			log.Printf("[calendar] get entries failed user_id=%d err=%v", userID, err)
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to get cycle entries")
+		}
+		if len(entries) == 0 {
+			return fiber.NewError(fiber.StatusBadRequest, "cycle data is required")
 		}
 
-		return c.Status(fiber.StatusOK).JSON(cycle.GetCalendar(from, to, *entry))
+		return c.Status(fiber.StatusOK).JSON(cycle.GetCalendarFromEntries(from, to, entries))
 	})
 }
 
 func userIDFromContext(c *fiber.Ctx) (int64, bool) {
 	userID, ok := c.Locals("userID").(int64)
 	return userID, ok
+}
+
+func periodStartFromRequest(req cycleStartRequest) (time.Time, error) {
+	periodStart, err := time.Parse(dateLayout, req.PeriodStart)
+	if err != nil {
+		return time.Time{}, errors.New("periodStart must be YYYY-MM-DD")
+	}
+	return periodStart, nil
 }
 
 func cycleEntryFromRequest(req cycleRequest, userID int64) (models.CycleEntry, error) {

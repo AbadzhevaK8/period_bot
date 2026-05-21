@@ -55,6 +55,22 @@ func TestCycleEntryFromRequestValidation(t *testing.T) {
 	}
 }
 
+func TestPeriodStartFromRequest(t *testing.T) {
+	periodStart, err := periodStartFromRequest(cycleStartRequest{PeriodStart: "2026-05-21"})
+	if err != nil {
+		t.Fatalf("expected valid period start, got error: %v", err)
+	}
+	if periodStart.Format(dateLayout) != "2026-05-21" {
+		t.Fatalf("expected period start 2026-05-21, got %s", periodStart.Format(dateLayout))
+	}
+}
+
+func TestPeriodStartFromRequestValidation(t *testing.T) {
+	if _, err := periodStartFromRequest(cycleStartRequest{PeriodStart: "21.05.2026"}); err == nil {
+		t.Fatal("expected validation error")
+	}
+}
+
 func TestParseCalendarRange(t *testing.T) {
 	from, to, err := parseCalendarRange("2026-05-01", "2026-05-31")
 	if err != nil {

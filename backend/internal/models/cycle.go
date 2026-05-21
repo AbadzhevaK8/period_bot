@@ -24,3 +24,21 @@ type DayInfo struct {
 	Phase      Phase  `json:"phase"`
 	Forecast   string `json:"forecast"`
 }
+
+type SymptomLog struct {
+	ID        int       `json:"id"`
+	UserID    int64     `json:"userId"`
+	LogDate   time.Time `json:"logDate"`
+	Energy    int       `json:"energy"`
+	Mood      []string  `json:"mood"`
+	Body      []string  `json:"body"`
+	Note      string    `json:"note"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type Pattern struct {
+	Phase       string `json:"phase"`
+	Symptom     string `json:"symptom"`
+	Occurrences int    `json:"occurrences"`
+	Message     string `json:"message"`
+}

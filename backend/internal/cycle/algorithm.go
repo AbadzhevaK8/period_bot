@@ -1,6 +1,7 @@
 package cycle
 
 import (
+	"sort"
 	"time"
 
 	"github.com/medina/cycle-calendar/backend/internal/models"
@@ -19,6 +20,37 @@ func GetCalendar(from, to time.Time, entry models.CycleEntry) []models.DayInfo {
 
 	calendar := make([]models.DayInfo, 0)
 	for d := from; !d.After(to); d = d.AddDate(0, 0, 1) {
+		phase := GetPhaseForDate(d, entry)
+		calendar = append(calendar, models.DayInfo{
+			Date:       d.Format("2006-01-02"),
+			DayOfCycle: normalizeDayOfCycle(d, entry.PeriodStart, entry.CycleLength),
+			Phase:      phase,
+			Forecast:   forecastForPhase(phase.Name),
+		})
+	}
+	return calendar
+}
+
+func GetCalendarFromEntries(from, to time.Time, entries []models.CycleEntry) []models.DayInfo {
+	if to.Before(from) {
+		from, to = to, from
+	}
+	if len(entries) == 0 {
+		return []models.DayInfo{}
+	}
+
+	ordered := append([]models.CycleEntry(nil), entries...)
+	sort.Slice(ordered, func(i, j int) bool {
+		return ordered[i].PeriodStart.Before(ordered[j].PeriodStart)
+	})
+
+	calendar := make([]models.DayInfo, 0)
+	entryIndex := 0
+	for d := from; !d.After(to); d = d.AddDate(0, 0, 1) {
+		for entryIndex+1 < len(ordered) && !ordered[entryIndex+1].PeriodStart.After(d) {
+			entryIndex++
+		}
+		entry := ordered[entryIndex]
 		phase := GetPhaseForDate(d, entry)
 		calendar = append(calendar, models.DayInfo{
 			Date:       d.Format("2006-01-02"),

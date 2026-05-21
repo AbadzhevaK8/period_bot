@@ -60,6 +60,36 @@ export interface SaveCyclePayload {
   periodLength: number
 }
 
+export interface RecordCycleStartPayload {
+  periodStart: string
+}
+
+export interface SymptomLog {
+  id: number
+  userId: number
+  date: string
+  energy: number
+  mood: string[]
+  body: string[]
+  note: string
+  createdAt: string
+}
+
+export interface SaveSymptomPayload {
+  date: string
+  energy: number
+  mood: string[]
+  body: string[]
+  note: string
+}
+
+export interface Pattern {
+  phase: string
+  symptom: string
+  occurrences: number
+  message: string
+}
+
 function authHeaders() {
   const token = localStorage.getItem('auth_token')
   return {
@@ -98,7 +128,34 @@ export function saveCycle(payload: SaveCyclePayload) {
   })
 }
 
+export function recordCycleStart(payload: RecordCycleStartPayload) {
+  return apiRequest<{ status: string }>('/api/cycle/start', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getCalendar(from: string, to: string) {
   const params = new URLSearchParams({ from, to })
   return apiRequest<DayInfo[]>(`/api/calendar?${params.toString()}`)
+}
+
+export function getSymptom(date: string) {
+  return apiRequest<SymptomLog>(`/api/symptoms/${date}`)
+}
+
+export function getSymptoms(from: string, to: string) {
+  const params = new URLSearchParams({ from, to })
+  return apiRequest<SymptomLog[]>(`/api/symptoms?${params.toString()}`)
+}
+
+export function saveSymptom(payload: SaveSymptomPayload) {
+  return apiRequest<{ status: string }>('/api/symptoms', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function getInsights() {
+  return apiRequest<Pattern[]>('/api/insights')
 }

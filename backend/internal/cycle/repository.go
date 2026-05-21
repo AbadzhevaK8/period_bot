@@ -2,6 +2,7 @@ package cycle
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/medina/cycle-calendar/backend/internal/models"
@@ -31,6 +32,18 @@ func SaveCycleEntry(ctx context.Context, pool *pgxpool.Pool, entry models.CycleE
 	return err
 }
 
+func AddCycleStart(ctx context.Context, pool *pgxpool.Pool, entry models.CycleEntry) error {
+	_, err := pool.Exec(ctx, `
+		INSERT INTO cycle_entries (user_id, period_start, cycle_length, period_length)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (user_id, period_start)
+		DO UPDATE SET
+			cycle_length = EXCLUDED.cycle_length,
+			period_length = EXCLUDED.period_length
+	`, entry.UserID, entry.PeriodStart, entry.CycleLength, entry.PeriodLength)
+	return err
+}
+
 func GetLatestEntry(ctx context.Context, pool *pgxpool.Pool, userID int64) (*models.CycleEntry, error) {
 	row := pool.QueryRow(ctx, `
 		SELECT id, user_id, period_start, cycle_length, period_length, created_at
@@ -45,4 +58,27 @@ func GetLatestEntry(ctx context.Context, pool *pgxpool.Pool, userID int64) (*mod
 		return nil, err
 	}
 	return &entry, nil
+}
+
+func GetEntriesForCalendar(ctx context.Context, pool *pgxpool.Pool, userID int64, to time.Time) ([]models.CycleEntry, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT id, user_id, period_start, cycle_length, period_length, created_at
+		FROM cycle_entries
+		WHERE user_id = $1 AND period_start <= $2
+		ORDER BY period_start ASC, created_at ASC, id ASC
+	`, userID, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entries := make([]models.CycleEntry, 0)
+	for rows.Next() {
+		var entry models.CycleEntry
+		if err := rows.Scan(&entry.ID, &entry.UserID, &entry.PeriodStart, &entry.CycleLength, &entry.PeriodLength, &entry.CreatedAt); err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+	return entries, rows.Err()
 }

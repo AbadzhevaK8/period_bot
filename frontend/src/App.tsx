@@ -4,6 +4,7 @@ import WebApp from '@twa-dev/sdk'
 import Calendar from './pages/Calendar'
 import Onboarding from './pages/Onboarding'
 import Settings from './pages/Settings'
+import Symptoms from './pages/Symptoms'
 
 /**
  * Capture initData from the raw URL BEFORE any React Router processing.
@@ -93,7 +94,7 @@ function App() {
     const handleBack = () => navigate('/calendar')
 
     try {
-      if (token && location.pathname === '/settings') {
+      if (token && (location.pathname === '/settings' || location.pathname.includes('/symptoms'))) {
         backButton.show()
         backButton.onClick(handleBack)
       } else {
@@ -130,6 +131,7 @@ function App() {
         />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/calendar/day/:date/symptoms" element={<Symptoms />} />
         <Route path="/settings" element={<Settings />} />
         <Route
           path="*"

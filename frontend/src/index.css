@@ -311,7 +311,8 @@ h1 {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -470,6 +471,47 @@ button:disabled {
   gap: 12px;
   grid-template-columns: 44px 1fr 44px;
   margin-bottom: 18px;
+}
+
+.calendar-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 14px;
+}
+
+.secondary-action {
+  background: var(--button-soft-bg);
+  color: var(--text);
+}
+
+.secondary-action:hover:not(:disabled) {
+  background: var(--button-soft-hover);
+}
+
+.cycle-start-panel {
+  background: var(--button-soft-bg);
+  border-radius: var(--card-radius);
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.cycle-start-panel label {
+  color: var(--muted);
+  display: grid;
+  font-size: 0.88rem;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.cycle-start-panel input {
+  background: var(--panel-bg);
+  border: 0;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  min-height: 42px;
+  padding: 0 12px;
 }
 
 .calendar-header h1 {
@@ -691,6 +733,16 @@ button:disabled {
   margin: 12px 0 0;
 }
 
+.soft-action {
+  background: color-mix(in srgb, var(--day-cell-text) 16%, transparent);
+  color: var(--day-cell-text);
+  margin-top: 16px;
+}
+
+.soft-action:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--day-cell-text) 24%, transparent);
+}
+
 .day-card-meta {
   display: flex;
   flex-wrap: wrap;
@@ -704,6 +756,99 @@ button:disabled {
   font-size: 0.82rem;
   font-weight: 700;
   padding: 6px 10px;
+}
+
+.symptom-dot {
+  background: var(--day-cell-text);
+  border-radius: 999px;
+  height: 6px;
+  margin-top: auto;
+  width: 6px;
+}
+
+.symptoms-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.page-header p {
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.symptoms-form {
+  display: grid;
+  gap: 14px;
+}
+
+.symptom-section {
+  background: var(--button-soft-bg);
+  border-radius: var(--card-radius);
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.symptom-section h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.energy-picker,
+.chip-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.energy-picker {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.chip-grid {
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+}
+
+.energy-picker button,
+.chip-grid button {
+  background: var(--panel-bg);
+  color: var(--text);
+  min-width: 0;
+}
+
+.energy-picker button.active,
+.chip-grid button.active {
+  background: var(--primary);
+  color: var(--page-bg);
+}
+
+.note-field {
+  background: var(--button-soft-bg);
+  border-radius: var(--card-radius);
+  color: var(--muted);
+  display: grid;
+  font-size: 0.9rem;
+  font-weight: 700;
+  gap: 8px;
+  padding: 14px;
+}
+
+.note-field textarea {
+  background: var(--panel-bg);
+  border: 0;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  min-height: 96px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.insight-banner {
+  background: color-mix(in srgb, var(--primary) 16%, var(--button-soft-bg));
+  border-radius: var(--card-radius);
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 14px;
 }
 
 @media (max-width: 640px) {

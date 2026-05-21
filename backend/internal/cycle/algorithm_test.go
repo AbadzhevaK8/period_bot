@@ -63,3 +63,29 @@ func TestGetPhaseForDateWithVariants(t *testing.T) {
 		})
 	}
 }
+
+func TestGetCalendarFromEntriesUsesRecordedCycleStarts(t *testing.T) {
+	entries := []models.CycleEntry{
+		{PeriodStart: time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC), CycleLength: 28, PeriodLength: 5},
+		{PeriodStart: time.Date(2026, 5, 20, 0, 0, 0, 0, time.UTC), CycleLength: 28, PeriodLength: 5},
+	}
+
+	calendar := GetCalendarFromEntries(
+		time.Date(2026, 5, 19, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, 5, 21, 0, 0, 0, 0, time.UTC),
+		entries,
+	)
+
+	if len(calendar) != 3 {
+		t.Fatalf("expected 3 days, got %d", len(calendar))
+	}
+	if calendar[0].DayOfCycle != 19 {
+		t.Fatalf("expected May 19 to use previous cycle day 19, got %d", calendar[0].DayOfCycle)
+	}
+	if calendar[1].DayOfCycle != 1 {
+		t.Fatalf("expected May 20 to be new cycle day 1, got %d", calendar[1].DayOfCycle)
+	}
+	if calendar[2].DayOfCycle != 2 {
+		t.Fatalf("expected May 21 to be new cycle day 2, got %d", calendar[2].DayOfCycle)
+	}
+}

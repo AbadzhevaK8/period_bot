@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DayInfo, getCalendar, getCycle, saveCycle } from '../api/client'
+import { DayInfo, getCalendar, getCycle, getSymptoms, recordCycleStart, saveCycle } from '../api/client'
 import { applyTheme, dayCardStyleForTheme, getStoredTheme, phaseColorForTheme, phaseStyleForTheme, ThemeId } from '../theme'
 
 const phaseLabels: Record<string, string> = {
@@ -62,10 +62,14 @@ function Calendar() {
   const [periodStart, setPeriodStart] = useState(defaultPeriodStart)
   const [cycleLength, setCycleLength] = useState(28)
   const [periodLength, setPeriodLength] = useState(5)
+  const [cycleStartDate, setCycleStartDate] = useState(() => formatDate(new Date()))
+  const [showCycleStart, setShowCycleStart] = useState(false)
   const [needsSetup, setNeedsSetup] = useState(false)
   const [selectedDay, setSelectedDay] = useState<DayInfo | null>(null)
+  const [symptomDates, setSymptomDates] = useState<Set<string>>(() => new Set())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingCycleStart, setSavingCycleStart] = useState(false)
   const [error, setError] = useState('')
   const [theme] = useState<ThemeId>(getStoredTheme)
 
@@ -105,8 +109,11 @@ function Calendar() {
     try {
       await getCycle()
       const { first, last } = monthBounds(targetMonth)
-      const calendar = await getCalendar(formatDate(first), formatDate(last))
+      const from = formatDate(first)
+      const to = formatDate(last)
+      const [calendar, symptoms] = await Promise.all([getCalendar(from, to), getSymptoms(from, to)])
       setDays(calendar)
+      setSymptomDates(new Set(symptoms.map((log) => log.date)))
       setSelectedDay((current) => {
         if (current && calendar.some((day) => day.date === current.date)) {
           return current
@@ -145,6 +152,24 @@ function Calendar() {
       setError('Не удалось сохранить данные цикла.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleCycleStartSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setSavingCycleStart(true)
+    setError('')
+    try {
+      await recordCycleStart({ periodStart: cycleStartDate })
+      const nextMonth = new Date(`${cycleStartDate}T00:00:00`)
+      const targetMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1)
+      setMonth(targetMonth)
+      await loadCalendar(targetMonth)
+      setShowCycleStart(false)
+    } catch {
+      setError('Не удалось добавить начало цикла.')
+    } finally {
+      setSavingCycleStart(false)
     }
   }
 
@@ -211,6 +236,24 @@ function Calendar() {
 
       {error && <p className="error-text">{error}</p>}
 
+      <div className="calendar-actions">
+        <button type="button" className="secondary-action" onClick={() => setShowCycleStart((value) => !value)}>
+          Начался цикл
+        </button>
+      </div>
+
+      {showCycleStart && (
+        <form className="cycle-start-panel" onSubmit={handleCycleStartSubmit}>
+          <label>
+            Первый день менструации
+            <input value={cycleStartDate} type="date" onChange={(event) => setCycleStartDate(event.target.value)} required />
+          </label>
+          <button type="submit" disabled={savingCycleStart}>
+            {savingCycleStart ? 'Добавляем...' : 'Добавить запись'}
+          </button>
+        </form>
+      )}
+
       <div className="weekdays">
         {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
           <span key={day}>{day}</span>
@@ -238,6 +281,7 @@ function Calendar() {
             >
               <span className="day-number">{cell.date.getDate()}</span>
               {cell.info && <span className="cycle-day">{cell.info.dayOfCycle}</span>}
+              {cell.info && symptomDates.has(cell.info.date) && <span className="symptom-dot" aria-label="Есть отметка самочувствия" />}
             </div>
           )
         })}
@@ -259,6 +303,9 @@ function Calendar() {
             <span>{energyLabels[selectedDay.phase.energy] || selectedDay.phase.energy}</span>
           </div>
           <p>{selectedDay.forecast}</p>
+          <button className="soft-action" type="button" onClick={() => navigate(`/calendar/day/${selectedDay.date}/symptoms`)}>
+            Как ты себя чувствуешь?
+          </button>
         </section>
       )}
     </div>
