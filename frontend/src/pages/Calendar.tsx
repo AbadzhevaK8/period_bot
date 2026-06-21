@@ -115,8 +115,11 @@ function Calendar() {
       setDays(calendar)
       setSymptomDates(new Set(symptoms.map((log) => log.date)))
       setSelectedDay((current) => {
-        if (current && calendar.some((day) => day.date === current.date)) {
-          return current
+        if (current) {
+          const refreshedDay = calendar.find((day) => day.date === current.date)
+          if (refreshedDay) {
+            return refreshedDay
+          }
         }
         return calendar.find((day) => day.date === formatDate(new Date())) || calendar[0] || null
       })
